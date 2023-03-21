@@ -3,7 +3,7 @@ const {nanoid} = require('nanoid');
 const books = require('./books');
 
 const addBookHandler = (request, h) => {
-    const {name, year, author, summary, publisher, pageCount, readPage, reading} = request.payload;
+    const {name = '', year, author, summary, publisher, pageCount, readPage, reading} = request.payload;
     const id = nanoid(16);
     const insertedAt = new Date().toISOString();
     const updatedAt = insertedAt;
@@ -64,7 +64,7 @@ const getAllBookHandler = (request, h) => {
 
     if (name !== undefined) {
         filteredBook = books.filter((book) => {
-            return book.name.toLowerCase().trim() == name.toLowerCase().trim();
+            return book.name.toLowerCase().includes(name.toLowerCase());
         });
     }
 
@@ -81,11 +81,14 @@ const getAllBookHandler = (request, h) => {
             return book.finished === isFinished;
         });
     }
+    const filteredBooks = filteredBook.map((book) => {
+        return {id: book.id, name: book.name, publisher: book.publisher};
+    });
 
     const response = h.response({
         status: 'success',
         data: {
-            filteredBook,
+            books: filteredBooks,
         },
     }).code(200);
 
@@ -116,7 +119,7 @@ const getBookByIdHandler = (request, h) => {
 const editBookByIdHandler = (request, h) => {
     const {bookId} = request.params;
 
-    const {name, year, author, summary, publisher, pageCount, readPage, reading} = request.payload;
+    const {name = '', year, author, summary, publisher, pageCount, readPage, reading} = request.payload;
     const updatedAt = new Date().toISOString();
 
     // handler finished
